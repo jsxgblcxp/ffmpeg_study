@@ -1,8 +1,10 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <ffmpeg/swscale.h>
+#include <libswscale/swscale.h>
 
-int main()
+void SaveFrame(AVFrame *pFrame, int frameWidth, int frameHeight, int frameIndex);
+
+int main( int argc , char* argv[] )
 {
         //____________________________ opening data  ___________________________
         av_register_all();
@@ -10,7 +12,10 @@ int main()
         AVFormatContext *pFileFormatCxt = NULL;
 
         // Open video file
-        if(avformat_open_input(&pFileFormatCxt, argv[1], NULL, 0, NULL)!=0)
+        if(avformat_open_input(&pFileFormatCxt,
+                                argv[1],
+                                NULL,
+                                NULL)!=0)
                 return -1; // Couldn't open file
 
         // Retrieve stream information
@@ -44,21 +49,21 @@ int main()
                 return -1; // Codec not found
         }
         // Copy context
-        pCodecCtx = avcodec_alloc_context3(pCodec);
-        if(avcodec_copy_context(pCodecCtx, pCodecCtxOrig) != 0) {
+        pCodecCtxOrig = avcodec_alloc_context3(pCodec);
+        if(avcodec_copy_context( pCodecCtxOrig , pCodecCtx ) != 0) {
                 fprintf(stderr, "Couldn't copy codec context");
                 return -1; // Error copying codec context
         }
         // Open codec
-        if(avcodec_open2(pCodecCtx, pCodec)<0)
+        if(avcodec_open2(pCodecCtx, pCodec , NULL )<0)
                 return -1; // Could not open codec
 
         //____________________________ stroring data  ___________________________
         // Allocate video frame
         AVFrame *pFrame = NULL;
-        pFrame=av_frame_alloc();
+        pFrame=avcodec_alloc_frame();
         // Allocate an AVFrame structure
-        pFrameRGB = av_frame_alloc();
+        AVFrame * pFrameRGB = avcodec_alloc_frame();
         if(pFrameRGB==NULL)
                 return -1;
 
@@ -99,7 +104,7 @@ int main()
                                   NULL,
                                   NULL);
 
-        indexPicture=0;
+        int indexPicture=0;
         while(av_read_frame(pFileFormatCxt, &packet)>=0) { /* 每次一次读似乎直接延后一个  , 自动的 */
                 // Is this a packet from the video stream?
                 if(packet.stream_index==videoStream) {
@@ -142,7 +147,8 @@ int main()
         return 0;
 }
 
-void SaveFrame(AVFrame *pFrame, int frameWidth, int frameHeight, int frameIndex) {
+void SaveFrame(AVFrame *pFrame, int frameWidth, int frameHeight, int frameIndex) 
+{
                                                             //just used to make a name
         FILE *pPMMFile;
         char szFilename[32];
