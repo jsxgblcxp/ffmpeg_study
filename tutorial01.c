@@ -39,18 +39,18 @@ int main( int argc , char* argv[] )
                 return -1; // Didn't find a video stream
 
         // Get a pointer to the codec context for the video stream
-        pCodecCtx=pFileFormatCxt->streams[videoStream]->codec;
+        pCodecCtxOrig = pFileFormatCxt->streams[videoStream]->codec;
         AVCodec *pCodec = NULL;
 
         // Find the decoder for the video stream
-        pCodec=avcodec_find_decoder(pCodecCtx->codec_id);
+        pCodec=avcodec_find_decoder(pCodecCtxOrig->codec_id);
         if(pCodec==NULL) {
                 fprintf(stderr, "Unsupported codec!\n");
                 return -1; // Codec not found
         }
         // Copy context
-        pCodecCtxOrig = avcodec_alloc_context3(pCodec);
-        if(avcodec_copy_context( pCodecCtxOrig , pCodecCtx ) != 0) {
+        pCodecCtx = avcodec_alloc_context3(pCodec);
+        if(avcodec_copy_context(  pCodecCtx , pCodecCtxOrig ) != 0) {
                 fprintf(stderr, "Couldn't copy codec context");
                 return -1; // Error copying codec context
         }

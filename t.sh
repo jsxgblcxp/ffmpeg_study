@@ -1,2 +1,3 @@
-gcc  -g tutorial01.c -l avcodec -l avdevice -l avfilter -l avformat -l avutil -l swscale 
-gdb -x .gdb_setting a.out
+gcc -l avformat -l avdevice -l avcodec -l avfilter  -l avutil -l swscale  -g   `sdl-config --cflags --libs ` tutorial01.c 
+./a.out a.avi
+rm a.out
